@@ -32,13 +32,19 @@ class Ministry extends Model
      */
     public function subMinistries()
     {
-        return $this->belongsToMany('App\Ministry', 'relations',  'parent_id', 'ministry_id');
+        return $this->belongsToMany('App\Ministry', 'relations',  'parent_id', 'ministry_id')->withPivot('ministry_id', 'parent_id', 'level');
     }
     /** .....
     */
     public function parentMinistries()
     {
-    	return $this->belongsToMany('App\Ministry', 'relations', 'ministry_id', 'parent_id');
+    	return $this->belongsToMany('App\Ministry', 'relations', 'ministry_id', 'parent_id')
+        ->withPivot('level');
+    }
+
+    public function getParentAttribute($value)  
+    {
+        return  $this->parentMinistries->first();
     }
      /**
      * The table associated with the model.

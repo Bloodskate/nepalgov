@@ -4,6 +4,7 @@
 @section('title', 'Ministries')
 
 @section('content')
+	{{session()->get('parent_id')}}
 		<div class="panel panel-default">
 			@foreach($ministries as $ministry)
 				@include('partials._list')

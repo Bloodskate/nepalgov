@@ -15,33 +15,48 @@ Route::group(['middleware' => ['web']], function () {
 
 	Route::group(['middleware' => ['auth']], function () {
 	    
-	    Route::resource('ministries', 'MinistryController');
+	    
 
-		Route::get('ministries/new/1', array(
+		Route::get('ministries/new/', array(
 			'as'	=>		'ministries.firstForm',
 			'uses'	=> 		'MinistryController@getFirst'
 		));
 
-		Route::post('ministries/new/1', array(
+		Route::post('ministries/new/', array(
 			'as' 	=> 		'ministries.firstFormPost',
 			'uses'  => 		'MinistryController@postFirst'
 		));
 
-		Route::get('ministries/new/2', array(
+		Route::get('ministries/new/ministry', array(
 			'as'	=>		'ministries.ministryForm',
 			'uses'  =>		'MinistryController@getMinistryForm'
 		));
 
-		Route::post('ministries/new/2', array(
+		Route::post('ministries/new/ministry', array(
 			'as'	=>		'ministries.ministryFormPost',
 			'uses'	=>		'MinistryController@postMinistryForm'
 		));
 		
+		Route::get('ministries/new/category', array(
+			'as'	=>		'ministries.newCategory',
+			'uses'	=>		'MinistryController@category'
+		));
 		
+		Route::resource('ministries', 'MinistryController');
 
 	});
 	
 	Route::auth();
+
+	Route::get('/api/ministries/all', array(
+		'as'	=>		'api.all',
+		'uses'	=>		'MinistryController@apiAll'	
+	));
+
+	Route::get('/api/ministries/{id}', array(
+		'as'	=>		'api.ministry',
+		'uses'	=>		'MinistryController@apiMinistry'	
+	));
 	
 	Route::get('/', function () {
 	    return view('welcome');

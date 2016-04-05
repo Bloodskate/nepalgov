@@ -3,7 +3,6 @@
 @section('title', $ministry->title)
 
 @section('content')
-
 	 {!! Form::open([
 		'method' => 'delete',
 		'route' => ['ministries.destroy', $ministry->id]
@@ -25,4 +24,6 @@
 		{!! Form::submit('Delete',['class' => 'btn btn-primary']) !!}
 		
 	 	{!! Form::close() !!}
+
+
 @endsection

@@ -14,7 +14,12 @@ class MinistryController extends Controller
 
 	
     public function index(){
-    	$ministries = Ministry::all();
+    	$ministries = [];
+        $relations = Relation::where('level', 1)->get();
+        foreach ($relations as $relation) {
+            $ministries[] = Ministry::find($relation->ministry_id);
+        }
+        session()->forget('parent_id');
     	return view('ministries.index', array('ministries' => $ministries));
     }
 
@@ -48,6 +53,8 @@ class MinistryController extends Controller
 
     public function destroy($id){
 
+        $ministry = Ministry::find($id);
+        $ministry->parentMinistries()->detach();
     	Ministry::destroy($id);
 
     	return redirect()->route('ministries.index');
@@ -66,16 +73,19 @@ class MinistryController extends Controller
     }
 
     public function getFirst(){
-    	return view('ministries.firstForm');
+        return view('ministries.firstForm');
     }
 
     public function postFirst(Request $request){
-
+        
     	$title = $request->input('title');
     	$selected = $request->input('option');
     	
     	$ministry = new Ministry;
         $ministry->title = $title;
+
+        $ministry->save();
+
     	
     	$request->session()->put('ministry', $ministry);
 
@@ -85,7 +95,7 @@ class MinistryController extends Controller
     	
     	} elseif ($selected == 'category') {
     	
-    		return view('ministries.categories.show')->with('ministry', $ministry);
+    		return redirect()->action('MinistryController@category');
     	
     	} else {
     	
@@ -102,10 +112,55 @@ class MinistryController extends Controller
 
     public function postMinistryForm(Request $request){
     	$ministry = $request->session()->get('ministry');
-       	$ministry->save();
         $ministry->update($request->all());
-        $ministry->update(['has_child' => 0]);
+        $ministry->update([
+            'has_child' => 0
+        ]);
+        
+        if($p_id = session()->pull('parent_id')){
+            $ministry->parentMinistries()->attach($p_id, 
+                                                  ['level' => (Relation::where('ministry_id', $p_id)->get()->first()->level + 1)]); 
+
+        } else { 
+            $ministry->parentMinistries()->attach(0, ['level' => 1]);  
+        }
     	return redirect()->route('ministries.index');
+        
+    }
+
+    public function category(Request $request){
+        $ministry = $request->session()->get('ministry');
+        $ministry->update([
+            'has_child' =>  1
+        ]);
+        if($p_id = session()->pull('parent_id')){
+            $ministry->parentMinistries()->attach($p_id, 
+                                                  ['level' => (Relation::where('ministry_id', $p_id)->get()->first()->level + 1)]); 
+
+        } else { 
+            $ministry->parentMinistries()->attach(0, ['level' => 1]);  
+        }
+        return view('ministries.categories.show')->with('ministry', $ministry);
+    }
+
+
+
+    public function apiAll(){
+        $ministries = [];
+        $relations = Relation::where('level', 1)->get();
+        foreach ($relations as $relation) {
+            $ministries[] = Ministry::find($relation->ministry_id);
+        }
+        return $ministries;
+    }
+
+    public function apiMinistry($id){
+        
+        $ministry = Ministry::find($id);
+        $data = $ministry->toArray();
+        $data['children'] = $ministry->subMinistries()->pluck('ministry_id');
+        $data['parent'] = $ministry->parent->id;
+        return $data;
     }
 
 }
