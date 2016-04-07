@@ -17,15 +17,7 @@ Route::group(['middleware' => ['web']], function () {
 	    
 	    
 
-		Route::get('ministries/new/', array(
-			'as'	=>		'ministries.firstForm',
-			'uses'	=> 		'MinistryController@getFirst'
-		));
-
-		Route::post('ministries/new/', array(
-			'as' 	=> 		'ministries.firstFormPost',
-			'uses'  => 		'MinistryController@postFirst'
-		));
+		
 
 		Route::get('ministries/new/ministry', array(
 			'as'	=>		'ministries.ministryForm',
@@ -37,11 +29,27 @@ Route::group(['middleware' => ['web']], function () {
 			'uses'	=>		'MinistryController@postMinistryForm'
 		));
 		
-		Route::get('ministries/new/category', array(
+		Route::get('ministries/new/', array(
+			'as'	=>		'ministries.firstForm',
+			'uses'	=> 		'MinistryController@getFirst'
+		));
+
+		Route::post('ministries/new/{id?}', array(
+			'as' 	=> 		'ministries.firstFormPost',
+			'uses'  => 		'MinistryController@postFirst'
+		));
+
+		Route::get('ministries/new/{id}', array(
 			'as'	=>		'ministries.newCategory',
+			'uses'	=>		'MinistryController@newCategory'
+		));
+
+		Route::get('ministries/category', array(
+			'as'	=>		'ministries.category',
 			'uses'	=>		'MinistryController@category'
 		));
 		
+
 		Route::resource('ministries', 'MinistryController');
 
 	});
