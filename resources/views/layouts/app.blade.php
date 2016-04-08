@@ -7,6 +7,7 @@
 
     @include('partials._nav')
         
+		{{session()->get('parent_id')}}
     <div class="container">
     
         @yield('content')

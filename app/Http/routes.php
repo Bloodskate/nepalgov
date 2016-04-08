@@ -28,6 +28,16 @@ Route::group(['middleware' => ['web']], function () {
 			'as'	=>		'ministries.ministryFormPost',
 			'uses'	=>		'MinistryController@postMinistryForm'
 		));
+
+		Route::get('ministries/new/category', array(
+			'as'	=>		'ministries.categoryForm',
+			'uses'  =>		'MinistryController@getCategoryForm'
+		));
+
+		Route::post('ministries/new/caegory', array(
+			'as'	=>		'ministries.categoryFormPost',
+			'uses'	=>		'MinistryController@postCategoryForm'
+		));
 		
 		Route::get('ministries/new/', array(
 			'as'	=>		'ministries.firstForm',
@@ -60,6 +70,10 @@ Route::group(['middleware' => ['web']], function () {
 		'as'	=>		'api.all',
 		'uses'	=>		'MinistryController@apiAll'	
 	));
+
+	Route::get('/session_end', function(){
+		session()->flush();
+	});
 
 	Route::get('/api/ministries/{id}', array(
 		'as'	=>		'api.ministry',

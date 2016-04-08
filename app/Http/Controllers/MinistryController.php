@@ -76,22 +76,21 @@ class MinistryController extends Controller
 
         $ministry->save();*/
 
-        $data['title'] = $request->input('title');
-        $data['image_link'] = $request->input('image_link');
+        /*$data['title'] = $request->input('title');
+        $data['image_link'] = $request->input('image_link');*/
 
 
         if($option == 'ministry') {
             if($request->has('parent_id')){
-                return view('ministries.ministryForm',['parent_id' => $request->input('parent_id'),
-                                                        'title' => $data['title'],
-                                                        'image_link' => $data['image_link']]);
+                return view('ministries.ministryForm',['parent_id' => $request->input('parent_id')]);
             }
-            return view('ministries.ministryForm', ['title' => $data['title'],
-                                                        'image_link' => $data['image_link']]);
+            return view('ministries.ministryForm');
         
         } elseif($option == 'category') {
-            $request->session()->put('data', $data);
-            return redirect()->action('MinistryController@category')->withInput();
+            if($request->has('parent_id')){
+                return view('ministries.categoryForm',['parent_id' => $request->input('parent_id')]);
+            }
+            return view('ministries.categoryForm');
         
         }
     
@@ -131,6 +130,28 @@ class MinistryController extends Controller
         
         return view('ministries.firstForm')->with('parent_id', $id);
     }
+    public function getCategoryForm()
+    {
+        
+        return view('ministries.categoryForm');
+    }
+
+    public function postCategoryForm(Request $request){
+        $ministry = Ministry::create([
+            'title'  => $request->input('title'),
+            'image_link' => $request->input('image_link'),
+            'has_child' => 1
+        ]);
+        if($request->has('parent_id')){
+            $p_id = $request->input('parent_id');
+            $level = Relation::where('ministry_id', $p_id)->get()->first()->level;
+            $ministry->parentMinistries()
+                     ->attach($p_id, ['level' => ( $level + 1)]);
+        } else { 
+            $ministry->parentMinistries()->attach(0, ['level' => 1]);  
+        }
+        return redirect()->route('ministries.index');
+    }
 
     public function category(Request $request){
         $data = $request->session()->pull('data');
@@ -141,12 +162,18 @@ class MinistryController extends Controller
         ]);
         if($request->session()->has('parent_id')){
             $p_id = $request->session()->pull('parent_id');
-            $level = Relation::where('ministry_id', $p_id)->get()->first()->level;
-            $ministry->parentMinistries()
-                     ->attach($p_id, ['level' => ( $level + 1)]);
-        } else { 
-            $ministry->parentMinistries()->attach(0, ['level' => 1]);  
+            $request->session()->forget('parent_id');
+        } else {
+            $request->session()->forget('parent_id');
+            $p_id = 0;
         }
+        if(Relation::where('ministry_id', $p_id)->count() > 0){
+            $level = Relation::where('ministry_id', $p_id)->get()->first()->level;
+        } else {
+            $level = 0;
+        }
+        $ministry->parentMinistries()
+                     ->attach($p_id, ['level' => ( $level + 1)]);
         return redirect()->route('ministries.show', $ministry->id);
     }
 
@@ -218,8 +245,12 @@ class MinistryController extends Controller
         
         $ministry = Ministry::find($id);
         $data = $ministry->toArray();
-        $data['children'] = $ministry->subMinistries()->pluck('ministry_id');
-        $data['parent'] = $ministry->parent->id;
+        if($ministry->subMinistries->first()){
+            $data['children'] = $ministry->subMinistries()->pluck('ministry_id');    
+        }
+        if($ministry->parent){
+          $data['parent'] = $ministry->parent->id;  
+        }
         return $data;
     }
 

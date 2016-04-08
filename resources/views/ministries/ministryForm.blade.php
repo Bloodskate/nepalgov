@@ -6,6 +6,12 @@
 	 	{!! Form::open([
 	 		'route' => 'ministries.ministryFormPost'
 	 	]) !!}
+	 		{!! Form::label('title', 'Title') !!}
+			{!! Form::text('title') !!}
+		<br>
+			{!! Form::label('image', 'Image') !!}  
+			{!! Form::text('image_link') !!} <b><i>Upload garne system rakhne</i></b>
+		<br>
 				Social Media Baki Xa <br>
 			{!! Form::label('detail', 'Detail') !!}  
 			{!! Form::textarea('detail') !!}
@@ -21,8 +27,7 @@
 		<br>
 			{!! Form::label('website', 'Website') !!}  
 			{!! Form::textarea('website') !!}
-			{!! Form::hidden('title', $title) !!}
-			{!! Form::hidden('image_link', $image_link) !!}
+			
 			@if( ! empty($parent_id))
 				{!! Form::hidden('parent_id', $parent_id) !!}    			
 			@endif
